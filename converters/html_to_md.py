@@ -3,17 +3,25 @@ from os import walk
 import os.path
 from markdownify import markdownify
 
-def convert_html_to_md(HtmlList):
-    for path in HtmlList:
+path_from = "output/html"
+path_to = "output/markdown"
+def convert_html_to_md():
 
-        pathsplit = path.split("/")
+    print("HTML to Markdown", end="")
+    for file_name in os.listdir(path_from):
 
-        file = open(str(path), "r").read()
-        html = markdownify(file, heading_style="ATX")
-        f = open("output/markdown/" + str(pathsplit[-1]).replace(".html", ".md"), "w")
-        f.write(html)
+        if not file_name.endswith(".html"):
+            continue
+
+        print(".", end="")
+        html = open(f"{path_from}/{file_name}", "r").read()
+        md = markdownify(html, strip=['style'], heading_style="ATX")
+
+        file_name = file_name.replace(".html", ".md")
+
+        f = open(f"{path_to}/{file_name}", "w")
+        f.write(md)
         f.close()
 
-
-
-    return "html was converted to markdown (1/3)"
+    print()
+    return "HTML was converted to Markdown (2/4)"

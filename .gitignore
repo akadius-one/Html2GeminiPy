@@ -1,0 +1,7 @@
+input/*.htm
+input/*.html
+
+output/html/*.html
+output/markdown/*.md
+output/gemini/*.gmi
+

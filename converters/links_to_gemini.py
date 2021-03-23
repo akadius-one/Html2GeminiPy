@@ -4,7 +4,13 @@ import os.path
 
 def convert_links_to_gemini(domain):
 
+    print("Links to gemini", end="")
     for file in os.listdir("output/gemini"):
+
+        if not file.endswith(".md"):
+            continue
+
+        print(".", end="")
         processed = ""
         f = open("output/gemini/" + file, "r")
         for line in f.readlines():
@@ -25,4 +31,5 @@ def convert_links_to_gemini(domain):
         f.write(processed)
         f.close()
 
-    return("links are converted to gemini (3/3)")
+    print()
+    return("Links are converted to gemini (4/4)")
