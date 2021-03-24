@@ -1,35 +1,156 @@
 import os
-from os import walk
 import os.path
 import bleach
+import re
 
-tags = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'h1','h2','h3','h4','h5','h6','h7','hr','li', 'ol', 'pre', 'strong', 'ul']
+tags = [
+    'a',
+    'abbr',
+    'acronym',
+    'b',
+    'blockquote',
+    'big',
+    'br',
+    'code',
+    'em',
+    'i',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7',
+    'hr',
+    'li',
+    'ol',
+    'pre',
+    'strong',
+    'style',
+    'ul'
+]
 
-attr = {'a': ['href', 'title'], 'abbr': ['title'], 'acronym': ['title']}
+attr = {
+    'a': ['href', 'title', 'name', 'alt'],
+    'abbr': ['title'],
+    'acronym': ['title'],
+    'style': ['type']
+}
 
+path_to= "output/html"
 
-def convert_html_to_stripped_html(HtmlList):
+def convert_html_to_stripped_html(HtmlList, overwrite=False):
 
     if len(HtmlList) == 0:
         return "No html files found"
 
-
-    print("HTML to Stripped HTML", end="")
+    print("HTML to Stripped HTML")
     for path in HtmlList:
 
-        print(".", end="")
+        if not path.endswith(".htm") and not path.endswith("html") :
+            continue
+
         pathsplit = path.split("/")
-
-        html_original = open(str(path), "r").read()
-        html = bleach.clean(html_original, 
-            tags=tags, attributes=attr, strip=True)
-
         file_name = str(pathsplit[-1])
         file_name = file_name.replace(".htm", ".html")
-        f = open(f"output/html/{file_name}", "w")
-        f.write(html)
-        f.close()
 
-    print()
-    return "HTML was stripped (1/4)"
+        if not os.path.exists(f"{path_to}/{file_name}") or overwrite:
+            print(".", end="")
 
+            html_original = open(str(path), "r").read()
+
+            html = remove_head(html_original)
+            html = bleach.clean(
+                html,
+                tags=tags,
+                attributes=attr,
+                strip=True,
+                strip_comments=True
+            )
+            html = replace_br(html)
+            html = replace_hr(html)
+            html = remove_heading_newlines(html)
+            
+            f = open(f"{path_to}/{file_name}", "w")
+            f.write(html)
+            f.close()
+
+    print(" Done")
+
+
+def remove_head(html):
+
+    start = re.search("<head>", html, re.IGNORECASE)
+    end = re.search("</head>", html, re.IGNORECASE)
+
+    if start:
+        start = start.span()[0]
+
+    if end:
+        end = end.span()[1]
+
+        if not start:
+            start = 0
+        
+        html = html[:start] + html[end:]
+        
+    return html
+
+
+def replace_br(html):
+    return html.replace("<br>", "\r\n")
+
+
+def replace_hr(html):
+    return html.replace("<hr>", "-"*30 )
+
+
+def remove_heading_newlines(html):
+    
+    h_max = 7
+    
+    for h_num in range(1, h_max):
+        
+        pos = 0
+        last = 0
+        html_sep = []
+        
+        h = "h" + str(h_num)
+        h_open = re.compile( re.escape(f"<{h}>") )
+        h_close = re.compile( re.escape(f"</{h}>") )
+
+        start = h_open.search( html, pos )
+        
+        while start is not None :
+            
+            start = start.span()[1]
+            pos = start
+
+            end = h_close.search( html, pos )
+            
+            if end is not None :
+                pos = end.span()[1]
+                end = end.span()[0]
+        
+                heading = html[start:end]
+                heading = heading.replace("\r", "")
+                heading = heading.replace("\n", "")
+
+                html_sep.append(html[last:start])
+                html_sep.append(heading)
+                html_sep.append(html[end:pos])
+
+            last = pos
+            start = h_open.search( html, pos )
+
+        html_sep.append(html[last:])
+        
+        html = "".join(html_sep)
+        
+    
+    return html
+
+
+if __name__ == "__main__" :
+    
+    print( "Test" )
+    
+    print( remove_heading_newlines("<h1>Hrlle</h1>") )
+    print( remove_heading_newlines("<body><h1>Hrlle</h1>SOMEewfwef </body>") )
+    print( remove_heading_newlines("<h1>Hr\n\rlle</h1>") )
+    print( remove_heading_newlines("<body><h1>Hr\r\nlle\r\n</h1>SOME<h3>Hr\r\nlle\r\n</h3>ewfwef </body>") )
+    
