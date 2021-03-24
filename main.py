@@ -6,9 +6,6 @@ from converters.html_to_md import convert_html_to_md
 from converters.md_to_gemini import convert_md_to_gemini
 from converters.html_to_stripped_html import convert_html_to_stripped_html
 
-dir = "input"
-
-
 # def wipe_old():
 #     return "Nope"
 #     for root, dirs, files in os.walk("output"):
@@ -35,12 +32,15 @@ def get_html(PathList):
             HtmlList.append(path)
     return HtmlList
 
-
-PathList = get_paths(dir)
-HtmlList = get_html(PathList)
-
 domain = "akademy.uk"  # Fill in your domain or leave untouched if you dont have one!!!
 overwrite = False
+
+dir = "input"
+dir = r"D:\temp\gutenberg-htm"
+
+PathList = get_paths(dir)
+PathList = PathList[:100]
+HtmlList = get_html(PathList)
 
 #print(wipe_old())
 

@@ -26,17 +26,10 @@ def convert_md_to_gemini(domain, overwrite=False):
         tic = time.perf_counter()
         gemini = create_gemini(file_name)
         toc = time.perf_counter()
-        print(f"create_gemini time {toc - tic:0.4f} seconds")
+        print(f"create_gemini time {toc - tic:0.4f} seconds for {file_name}")
 
-        tic = toc
         gemini = remove_html(gemini)
-        toc = time.perf_counter()
-        print(f"remove_html time {toc - tic:0.4f} seconds")
-        
-        tic = toc
         gemini = links_to_gemini(gemini, domain)
-        toc = time.perf_counter()
-        print(f"links_to_gemini time {toc - tic:0.4f} seconds")
 
         f = open(f"{path_to}/{new_file_name}", "w")
         f.write(gemini)
@@ -47,10 +40,10 @@ def convert_md_to_gemini(domain, overwrite=False):
 
 def create_gemini(file_name):
 
-    with open("output/markdown/" + str(file_name), "r") as f:
-        gemini = md2gemini(f.read())
+    with open(f"{path_from}/{file_name}", "r") as f:
+        markdown = f.read()
 
-    return gemini
+    return md2gemini(markdown, links="copy")
 
 
 def remove_html(gemini):
