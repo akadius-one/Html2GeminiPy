@@ -1,46 +1,50 @@
 import os
-import os.path
 import time
 
 from md2gemini import md2gemini
+from converters import util
 
 path_from = "output/markdown"
 path_to = "output/gemini"
 
 
-def convert_md_to_gemini(domain, overwrite=False):
-
+def convert_md_to_gemini(path_list, domain, overwrite=False):
+    
+    file_outputs = []
     print("Markdown to Gemini")
 
-    for file_name in os.listdir(path_from):
+    for path_input in path_list:
 
-        if not file_name.endswith(".md"):
+        if not path_input.endswith(".md"):
             continue
+        
+        file_input = os.path.basename(path_input)
+        file_output = os.path.join( path_to, file_input.replace(".md", ".gmi") )
+        if overwrite or not util.file_exists(file_output) :
+        
+            # print(".", end="")
+            print(f"- {file_input}")
+            
+            tic = time.perf_counter()
+            gemini = create_gemini(path_input)
+            toc = time.perf_counter()
+            print(f"create_gemini time {toc - tic:0.4f} seconds for {path_input}")
+    
+            gemini = remove_html(gemini)
+            gemini = links_to_gemini(gemini, domain)
+    
+            f = open( file_output, "w", encoding="utf-8")
+            f.write(gemini)
+            f.close()
 
-        new_file_name = file_name.replace(".md", ".gmi")
-        if os.path.exists(f"{path_to}/{new_file_name}") and not overwrite:
-            continue
-
-        print(".", end="")
-
-        tic = time.perf_counter()
-        gemini = create_gemini(file_name)
-        toc = time.perf_counter()
-        print(f"create_gemini time {toc - tic:0.4f} seconds for {file_name}")
-
-        gemini = remove_html(gemini)
-        gemini = links_to_gemini(gemini, domain)
-
-        f = open(f"{path_to}/{new_file_name}", "w")
-        f.write(gemini)
-        f.close()
+        file_outputs.append(file_output)
 
     print(" Done")
+    return file_outputs
 
+def create_gemini(path):
 
-def create_gemini(file_name):
-
-    with open(f"{path_from}/{file_name}", "r") as f:
+    with open(path, "r", encoding="utf-8") as f:
         markdown = f.read()
 
     return md2gemini(markdown, links="copy")

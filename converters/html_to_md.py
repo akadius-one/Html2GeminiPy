@@ -1,31 +1,40 @@
 import os
-from os import walk
-import os.path
+
 from markdownify import markdownify
+
+from converters import util
 
 path_from = "output/html"
 path_to = "output/markdown"
 
 
-def convert_html_to_md(overwrite=False):
+def convert_html_to_md(path_list, overwrite=False):
 
+    file_outputs = []
+    
     print("HTML to Markdown")
-    for file_name in os.listdir(path_from):
+    for path_input in path_list:
 
-        if not file_name.endswith(".html"):
+        if not path_input.endswith(".html"):
             continue
+
+        file_input = os.path.basename(path_input)
+        path_output = os.path.join(path_to, file_input.replace(".html", ".md") )
+        if overwrite or not util.file_exists(path_output):
+
+            # print(".", end="")
+            print(f"- {file_input}")
             
-        new_file_name = file_name.replace(".html", ".md")
-        if os.path.exists(f"{path_to}/{new_file_name}") and not overwrite:
-            continue
-
-        print(".", end="")
-        html = open(f"{path_from}/{file_name}", "r").read()
-        md = markdownify(html, strip=['style'], heading_style="ATX")
-
+            html = open(path_input, "r", encoding="utf-8").read()
+            md = markdownify(html, strip=['style'], heading_style="ATX")
+    
+            f = open(path_output, "w", encoding="utf-8")
+            f.write(md)
+            f.close()
+            
+        file_outputs.append(path_output)
         
-        f = open(f"{path_to}/{new_file_name}", "w")
-        f.write(md)
-        f.close()
+        
 
     print(" Done")
+    return file_outputs

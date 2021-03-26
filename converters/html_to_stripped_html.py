@@ -1,7 +1,9 @@
-import os
-import os.path
-import bleach
 import re
+import os.path
+
+import bleach
+
+from converters import util
 
 tags = [
     'a',
@@ -33,26 +35,29 @@ attr = {
 
 path_to= "output/html"
 
-def convert_html_to_stripped_html(HtmlList, overwrite=False):
 
-    if len(HtmlList) == 0:
-        return "No html files found"
+def convert_html_to_stripped_html(path_list, overwrite=False):
 
     print("HTML to Stripped HTML")
-    for path in HtmlList:
+    
+    file_outputs = []
+    if len(path_list) == 0:
+        return file_outputs
+
+    for path in path_list:
 
         if not path.endswith(".htm") and not path.endswith("html") :
             continue
 
-        pathsplit = path.split("/")
-        file_name = str(pathsplit[-1])
-        file_name = file_name.replace(".htm", ".html")
-
-        if not os.path.exists(f"{path_to}/{file_name}") or overwrite:
-            print(".", end="")
-
-            html_original = open(str(path), "r").read()
-
+        file_name = os.path.basename(path)
+        file_output = os.path.join(path_to, file_name.replace(".htm", ".html") )
+        if overwrite or not util.file_exists(file_output) :
+                    
+            #print(".", end="")
+            print(f"- {file_name}")
+    
+            html_original = open(str(path), "r", encoding="utf-8").read()
+    
             html = remove_head(html_original)
             html = bleach.clean(
                 html,
@@ -65,11 +70,14 @@ def convert_html_to_stripped_html(HtmlList, overwrite=False):
             html = replace_hr(html)
             html = remove_heading_newlines(html)
             
-            f = open(f"{path_to}/{file_name}", "w")
+            f = open(file_output, "w", encoding="utf-8")
             f.write(html)
             f.close()
 
+        file_outputs.append(file_output)
+
     print(" Done")
+    return file_outputs
 
 
 def remove_head(html):
