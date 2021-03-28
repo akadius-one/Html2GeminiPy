@@ -2,7 +2,6 @@ import sys
 import xml.sax
 from pymongo import MongoClient
 
-count_stop = 1000
 file_name = r"D:\Downloads\catalog.rdf\catalog.rdf"
 
 
@@ -10,6 +9,7 @@ class Book:
     id = None
     title = None
     friendly_title = None
+    author = None
     language = None
     downloads = None
     
@@ -24,6 +24,8 @@ class Book:
             d["title"] = self.title
         if self.friendly_title is not None:
             d["friendly_title"] = self.friendly_title
+        if self.author is not None:
+            d["author"] = self.author
         if self.language is not None:
             d["language"] = self.language
         if self.downloads is not None:
@@ -36,6 +38,8 @@ class Book:
             s += " Title: " + self.title + "\n"
         if self.friendly_title is not None:
             s += " Friendly Title: " + self.friendly_title + "\n"
+        if self.author is not None:
+            s += " Author: " + self.author + "\n"
         if self.language is not None:
             s += " Language: " + self.language + "\n"
         if self.downloads is not None:
@@ -85,13 +89,10 @@ class GutenburgHandler(xml.sax.ContentHandler):
             "dc:title",
             "pgterms:friendlytitle",
             "dc:language",
-            "pgterms:downloads"
+            "pgterms:downloads",
+            "dc:creator"
         ]:
             self._clearCharaterData()
-    
-        if self.count > count_stop :
-            sys.exit()
-        self.count += 1
         
     def endElement(self, name ):
         
@@ -110,6 +111,10 @@ class GutenburgHandler(xml.sax.ContentHandler):
             friendly_title = self._getCharacterData()
             self.book.friendly_title = friendly_title
             
+        if name == "dc:creator":
+            author = self._getCharacterData()
+            self.book.author = author
+                
         if name == "dc:language" :
             language = self._getCharacterData()
             self.book.language = language
@@ -128,4 +133,4 @@ collection = db["books"]
 
 parser = xml.sax.make_parser()
 parser.setContentHandler(GutenburgHandler(collection))
-parser.parse( open(file_name, "r") )
+parser.parse( open(file_name, "r", encoding="utf-8") )
