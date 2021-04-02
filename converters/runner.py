@@ -31,7 +31,7 @@ def run( output_root_path, html_list, domain, overwrite, timings=False, wait_cou
 		tic = timer(tic, "md")
 
 	output_path = os.path.join(output_root_path, "gemini")
-	_gemini_list = convert_md_to_gemini(output_path, md_list, domain, overwrite, wait_count, wait_length)
+	_gemini_list = convert_md_to_gemini(output_path, md_list, domain, overwrite, wait_count, wait_length, timings)
 	
 	if timings:
 		_tic = timer(tic, "gemini")

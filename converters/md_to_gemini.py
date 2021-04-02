@@ -5,7 +5,7 @@ from md2gemini import md2gemini
 from converters import util
 
 
-def convert_md_to_gemini(path_to, path_list, domain, overwrite=False, wait_count=100, wait_length=10):
+def convert_md_to_gemini(path_to, path_list, domain, overwrite=False, wait_count=100, wait_length=10, timings=False):
     
     file_outputs = []
     print("Markdown to Gemini")
@@ -23,10 +23,13 @@ def convert_md_to_gemini(path_to, path_list, domain, overwrite=False, wait_count
             # print(".", end="")
             print(f"- {file_input}")
             
-            tic = time.perf_counter()
+            if timings:
+                tic = util.timer()
+                
             gemini = create_gemini(path_input)
-            toc = time.perf_counter()
-            print(f"create_gemini time {toc - tic:0.4f} seconds for {path_input}")
+            
+            if timings:
+                util.timer(tic, "create_gemini")
     
             gemini = remove_html(gemini)
             gemini = links_to_gemini(gemini, domain)

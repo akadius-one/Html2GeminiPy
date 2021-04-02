@@ -1,5 +1,4 @@
 import os.path
-import time
 import shutil
 
 from chardet.universaldetector import UniversalDetector
