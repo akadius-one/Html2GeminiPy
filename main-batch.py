@@ -12,7 +12,7 @@ def main_batch( output_path, input_root, domain, overwrite ):
         for file in files:
 
             if file.endswith(".htm") or file.endswith(".html") :
-                html_files.append(file)
+                html_files.append(os.path.join(root, file))
     
                 if len(html_files) == batch :
                     

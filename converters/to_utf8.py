@@ -21,7 +21,7 @@ def convert_to_utf8(path_to, path_list, overwrite=False, wait_count=100, wait_le
 
         file_input = os.path.basename(path_input)
         path_output = os.path.join(path_to, file_input )
-        if overwrite or util.file_exists(path_output):
+        if overwrite or not util.file_exists(path_output):
             
             print( f"- {file_input}", end="" )
             
