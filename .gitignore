@@ -5,3 +5,4 @@ output/html/*.html
 output/markdown/*.md
 output/gemini/*.gmi
 
+/Html2GeminiPy.iml
