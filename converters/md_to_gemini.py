@@ -4,15 +4,13 @@ import time
 from md2gemini import md2gemini
 from converters import util
 
-path_from = "output/markdown"
-path_to = "output/gemini"
 
-
-def convert_md_to_gemini(path_list, domain, overwrite=False):
+def convert_md_to_gemini(path_to, path_list, domain, overwrite=False, wait_count=100, wait_length=10):
     
     file_outputs = []
     print("Markdown to Gemini")
 
+    count = 0
     for path_input in path_list:
 
         if not path_input.endswith(".md"):
@@ -36,11 +34,16 @@ def convert_md_to_gemini(path_list, domain, overwrite=False):
             f = open( file_output, "w", encoding="utf-8")
             f.write(gemini)
             f.close()
-
+            
+            count += 1
+            if count % wait_count == 0:
+                util.pause(wait_length)
+                
         file_outputs.append(file_output)
 
     print(" Done")
     return file_outputs
+
 
 def create_gemini(path):
 

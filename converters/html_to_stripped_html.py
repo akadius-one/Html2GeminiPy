@@ -1,4 +1,5 @@
 import re
+import time
 import os.path
 
 import bleach
@@ -33,10 +34,8 @@ attr = {
     'style': ['type']
 }
 
-path_to= "output/html"
 
-
-def convert_html_to_stripped_html(path_list, overwrite=False):
+def convert_html_to_stripped_html(path_to, path_list, overwrite=False, wait_count=100, wait_length=10):
 
     print("HTML to Stripped HTML")
     
@@ -44,6 +43,7 @@ def convert_html_to_stripped_html(path_list, overwrite=False):
     if len(path_list) == 0:
         return file_outputs
 
+    count = 0
     for path in path_list:
 
         if not path.endswith(".htm") and not path.endswith("html") :
@@ -73,7 +73,11 @@ def convert_html_to_stripped_html(path_list, overwrite=False):
             f = open(file_output, "w", encoding="utf-8")
             f.write(html)
             f.close()
-
+            
+            count += 1
+            if count % wait_count == 0:
+                util.pause(wait_length)
+                
         file_outputs.append(file_output)
 
     print(" Done")
@@ -100,11 +104,11 @@ def remove_head(html):
 
 
 def replace_br(html):
-    return html.replace("<br>", "\r\n")
+    return html.replace("<br/>", "\r\n").replace("<br>", "\r\n")
 
 
 def replace_hr(html):
-    return html.replace("<hr>", "-"*30 )
+    return html.replace("<hr/>", "-"*30 ).replace("<hr>", "-"*30 )
 
 
 def remove_heading_newlines(html):

@@ -1,53 +1,65 @@
 import os.path
+import time
 import shutil
+
 from chardet.universaldetector import UniversalDetector
 
+from converters import util
 
-path_to = "output/utf8"
 
-
-def convert_to_utf8(path_list):
+def convert_to_utf8(path_to, path_list, overwrite=False, wait_count=100, wait_length=10):
 
     print("To utf-8")
     file_outputs = []
     
     detector = UniversalDetector()
-    
+
+    count = 0
     for path_input in path_list:
-        
+
+        if not path_input.endswith(".htm") and not path_input.endswith("html") :
+            continue
+
         file_input = os.path.basename(path_input)
-        print( f"- {file_input}", end="" )
-               
-        detector.reset()
-        with open(path_input, 'rb') as f:
+        path_output = os.path.join(path_to, file_input )
+        if overwrite or util.file_exists(path_output):
             
-            for line in f:
-                detector.feed(line)
-                if detector.done:
-                    break
-            detector.close()
-
-        encoding = detector.result["encoding"]
-        print( f" : {encoding}, " + str(detector.result["confidence"]) )
-
-        file_output = os.path.join(path_to, file_input )
-        if encoding in ['utf-8', 'ascii'] :
+            print( f"- {file_input}", end="" )
             
-            try:
-                shutil.copyfile(path_input, file_output )
-            except shutil.SameFileError:
-                pass
-            
-        else:
-
+            detector.reset()
             with open(path_input, 'rb') as f:
-                decoded = f.read()
+                
+                for line in f:
+                    detector.feed(line)
+                    if detector.done:
+                        break
+                detector.close()
+    
+            encoding = detector.result["encoding"]
+            print( f" : {encoding}, " + str(detector.result["confidence"]) )
+    
             
-            encoded = decoded.decode(encoding)
-            with open(file_output, 'w', encoding="utf-8") as f:
-                f.write(encoded)
+            if encoding in ['utf-8', 'ascii'] :
+                
+                try:
+                    shutil.copyfile(path_input, path_output )
+                except shutil.SameFileError:
+                    pass
+                
+            else:
+    
+                with open(path_input, 'rb') as f:
+                    bytes = f.read()
+                
+                encoded = bytes.decode(encoding)
+                with open(path_output, 'w', encoding="utf-8") as f:
+                    f.write(encoded)
 
-        file_outputs.append(file_output)
+            count += 1
+            if count % wait_count == 0:
+                util.pause(wait_length)
+
+        file_outputs.append(path_output)
 
     return file_outputs
 

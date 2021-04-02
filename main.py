@@ -1,12 +1,7 @@
 import os
 import os.path
 import sys
-import time
-
-from converters.html_to_md import convert_html_to_md
-from converters.md_to_gemini import convert_md_to_gemini
-from converters.html_to_stripped_html import convert_html_to_stripped_html
-from converters.to_utf8 import convert_to_utf8
+import converters.runner
 
 
 def wipe_old():
@@ -40,40 +35,28 @@ def get_html(PathList):
     return HtmlList
 
 
+def main( output_path, html_list, domain, overwrite ):
+    
+    converters.runner.run( output_path, html_list, domain, overwrite, True )
 
-domain = "akademy.uk"  # Fill in your domain or leave untouched if you dont have one!!!
-overwrite = True
 
-dir = "input"
-# dir = r"D:\temp\gutenberg-htm"
-# dir = r"C:\Users\tzf82424\Projects\mine\Html2GeminiPy\output\utf8"
+if __name__ == "__main__" :
+    
+    domain = "akademy.uk"  # Fill in your domain or leave untouched if you dont have one!!!
+    overwrite = False
+    
+    input_path = "input"
+    input_path = r"D:\temp\gutenberg-htm"
+    # dir = r"C:\Users\tzf82424\Projects\mine\Html2GeminiPy\output\utf8"
 
-path_list = get_paths(dir)
-path_list = sorted(path_list)
-path_list = path_list[:100]
+    output_path = "output"
 
-html_list = get_html(path_list)
-
-# wipe_old()
-
-tic = time.perf_counter()
-utf8_list = convert_to_utf8(html_list)
-toc = time.perf_counter()
-print(f"html_stripped time {toc - tic:0.4f} seconds")
-
-# sys.exit()
-
-tic = toc
-stripped_html_list = convert_html_to_stripped_html(utf8_list, overwrite)
-toc = time.perf_counter()
-print(f"html_stripped time {toc - tic:0.4f} seconds")
-
-tic = toc
-md_list = convert_html_to_md(stripped_html_list, overwrite)
-toc = time.perf_counter()
-print(f"markdown time {toc - tic:0.4f} seconds")
-
-tic = toc
-gemini_list = convert_md_to_gemini(md_list, domain, overwrite)
-toc = time.perf_counter()
-print(f"gemini time {toc - tic:0.4f} seconds")
+    # wipe_old()
+    
+    path_list = get_paths(input_path)
+    path_list = sorted(path_list)
+    path_list = path_list[:100]
+    
+    html_list = get_html(path_list)
+    
+    main(output_path, html_list, domain, overwrite)

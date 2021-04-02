@@ -1,18 +1,17 @@
 import os
+import time
 
 from markdownify import markdownify
 
 from converters import util
 
-path_from = "output/html"
-path_to = "output/markdown"
 
-
-def convert_html_to_md(path_list, overwrite=False):
+def convert_html_to_md(path_to, path_list, overwrite=False, wait_count=100, wait_length=10):
 
     file_outputs = []
-    
     print("HTML to Markdown")
+
+    count = 0
     for path_input in path_list:
 
         if not path_input.endswith(".html"):
@@ -32,9 +31,11 @@ def convert_html_to_md(path_list, overwrite=False):
             f.write(md)
             f.close()
             
+            count += 1
+            if count % wait_count == 0:
+                util.pause(wait_length)
+        
         file_outputs.append(path_output)
-        
-        
 
     print(" Done")
     return file_outputs
