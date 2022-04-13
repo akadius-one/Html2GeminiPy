@@ -23,6 +23,7 @@ def convert_md_to_gemini(path_to, path_list, domain, overwrite=False, wait_count
             # print(".", end="")
             print(f"- {file_input}")
             
+            
             if timings:
                 tic = util.timer()
                 

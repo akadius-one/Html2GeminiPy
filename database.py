@@ -54,10 +54,13 @@ class GutenburgHandler(xml.sax.ContentHandler):
     book = None
     collection = None
     
-    def __init__(self, collection):
+    def __init__(self, collection, exit_limit=0):
         self.collection = collection
         self._charBuffer = []
         self.in_book = False
+        
+        if exit_limit > 0 :
+            self.limit = exit_limit
 
     def commit(self):
         self.collection.insert_one(self.book.to_dict())
@@ -75,6 +78,10 @@ class GutenburgHandler(xml.sax.ContentHandler):
     
     def startElement(self, name, attrs):
 
+        if self.count > self.limit :
+            print( "Limit reached, exiting" )
+            sys.exit(0)
+            
         if name == "pgterms:etext":
             self.in_book = True
 
@@ -84,6 +91,7 @@ class GutenburgHandler(xml.sax.ContentHandler):
         if name == "pgterms:etext":
             bid = attrs.getValue("rdf:ID").replace("etext", "")
             self.book = Book( bid )
+            self.count += 1
     
         if name in [
             "dc:title",
@@ -132,5 +140,5 @@ db = client["gutenburg"]
 collection = db["books"]
 
 parser = xml.sax.make_parser()
-parser.setContentHandler(GutenburgHandler(collection))
+parser.setContentHandler(GutenburgHandler(collection, 10))
 parser.parse( open(file_name, "r", encoding="utf-8") )
