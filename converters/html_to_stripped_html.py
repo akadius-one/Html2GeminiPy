@@ -36,7 +36,7 @@ attr = {
 
 def convert_html_to_stripped_html(path_to, path_list, overwrite=False, wait_count=100, wait_length=10):
 
-    print("HTML to Stripped HTML")
+    print("*Convert to Stripped HTML")
     
     file_outputs = []
     if len(path_list) == 0:
@@ -50,6 +50,7 @@ def convert_html_to_stripped_html(path_to, path_list, overwrite=False, wait_coun
 
         file_name = os.path.basename(path)
         file_output = os.path.join(path_to, file_name.replace(".htm", ".html") )
+
         if overwrite or not util.file_exists(file_output) :
                     
             #print(".", end="")
